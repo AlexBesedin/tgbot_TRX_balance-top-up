@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
-.idea/
+# Папки, создаваемые средой разработки
+.idea
