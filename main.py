@@ -88,18 +88,21 @@ def unknown(update, context):
     )
 
 
-# Создание экземпляра Updater и добавление обработчиков команд
-updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
-dispatcher = updater.dispatcher
-dispatcher.add_handler(CommandHandler('start', start))
-dispatcher.add_handler(CommandHandler('balance', balance))
-dispatcher.add_handler(CommandHandler('deposit', deposit))
-dispatcher.add_handler(MessageHandler(Filters.command, unknown))
+def main():
+    # Создание экземпляра Updater и добавление обработчиков команд
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('balance', balance))
+    dispatcher.add_handler(CommandHandler('deposit', deposit))
+    dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
-# Запуск тел
-updater.start_polling()
-updater.idle()
+    updater.start_polling()
+    updater.idle()
 
+
+if __name__ == "__main__":
+    main()
 
 #pip install python-telegram-bot
 #pip install tronapi
