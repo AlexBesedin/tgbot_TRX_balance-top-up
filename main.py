@@ -32,9 +32,19 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 def start(update, context):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Привет! Я могу помочь тебе пополнить кошелек Tron (TRX)."
+        text="Привет! Я могу помочь тебе пополнить кошелек Tron (TRX). \r\nЕсли не знаешь с чего начать, запусти команду /info"
     )
 
+
+# Обработчик команды /info
+def info(update, context):
+    context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="/balance - Проверить текущий баланс кошелька\r\n"
+             "/deposit - Пополнить счёт своего кошелька"
+
+
+    )
 
 # Обработчик команды /balance
 def balance(update, context):
@@ -50,7 +60,7 @@ def balance(update, context):
     balance = account['balance']
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"Текущий баланс кошелька: {balance / 10**6} TRX"
+        text=f"💵Текущий баланс кошелька: {balance / 10**6} TRX"
     )
 
 
@@ -63,14 +73,20 @@ def deposit(update, context):
     # Проверка корректности ввода параметров
     if len(parameters) != 3:
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="Некорректный ввод параметров. Используйте команду /deposit <адрес получателя> <сумма>")
+                                 text="Некорректный ввод параметров. \r\nИспользуйте команду /deposit <адрес получателя> <сумма>")
         return
 
     to_address = parameters[1]
     amount = float(parameters[2])
 
     # Создание новой транзакции на пополнение кошелька
-    result = api.trx.send_trx(to=to_address, amount=amount, options={'from': TRX_ADDRESS})
+    result = api.trx.send_trx(
+        to=to_address,
+        amount=amount,
+        options={
+            'from': TRX_ADDRESS
+        }
+    )
 
     # Распечатка результата отправки транзакции
     print(result)
@@ -93,6 +109,7 @@ def main():
     updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('start', start))
+    dispatcher.add_handler(CommandHandler('info', info))
     dispatcher.add_handler(CommandHandler('balance', balance))
     dispatcher.add_handler(CommandHandler('deposit', deposit))
     dispatcher.add_handler(MessageHandler(Filters.command, unknown))
