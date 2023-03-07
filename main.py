@@ -1,7 +1,6 @@
 import logging
 import os
 import telegram
-from web3 import Web3
 import requests
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from tronapi import Tron, HttpProvider
