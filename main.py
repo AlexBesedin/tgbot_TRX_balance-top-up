@@ -1,6 +1,8 @@
 import logging
 import os
 import telegram
+from web3 import Web3
+import requests
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 from tronapi import Tron, HttpProvider
 from dotenv import load_dotenv
@@ -13,7 +15,10 @@ load_dotenv()
 
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TRX_ADDRESS = os.getenv('MAIN_ADDRESS')
-PRIVATE_KEY = os.getenv('PRIVATE_KEY')
+PRIVATE_KEY_TRX = os.getenv('PRIVATE_KEY')
+API_KEY_BSC = os.getenv('API_KEY_BSC')
+BNB_WALLET = os.getenv('BNB_WALLET')
+
 
 full_node = HttpProvider('https://api.trongrid.io')
 solidity_node = HttpProvider('https://api.trongrid.io')
@@ -22,7 +27,7 @@ api = Tron(
     full_node=full_node,
     solidity_node=solidity_node,
     event_server=event_server,
-    private_key=PRIVATE_KEY,
+    private_key=PRIVATE_KEY_TRX,
     default_address=TRX_ADDRESS
 )
 
@@ -33,7 +38,8 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 def start(update, context):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Привет! Я могу помочь тебе пополнить кошелек Tron (TRX). \r\nЕсли не знаешь с чего начать, запусти команду /info"
+        text="Привет! Я могу помочь тебе пополнить кошелек Tron (TRX).\r\n"
+             "Если не знаешь с чего начать, запусти команду /info"
     )
 
 
@@ -46,6 +52,27 @@ def info(update, context):
 
 
     )
+
+
+def get_balance(api_key, address):
+    url = f'https://api.bscscan.com/api?module=account&action=balance&address={address}&tag=latest&apikey={api_key}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        balance = float(response.json()['result']) / 10**18
+        return balance
+    else:
+        raise ValueError('Не удалось получить баланс')
+
+
+# Обработчик команды /bnb_balance
+def bnb_balance(update, context):
+    chat_id = update.message.chat_id
+    balance = get_balance(API_KEY_BSC, BNB_WALLET)
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=f'Ваш текущий баланс: {balance:.6f} BNB'
+    )
+
 
 # Обработчик команды /balance
 def balance(update, context):
@@ -74,7 +101,8 @@ def deposit(update, context):
     # Проверка корректности ввода параметров
     if len(parameters) != 3:
         context.bot.send_message(chat_id=update.effective_chat.id,
-                                 text="Некорректный ввод параметров. \r\nИспользуйте команду /deposit <адрес получателя> <сумма>")
+                                 text="Некорректный ввод параметров. \r\n"
+                                      "Используйте команду /deposit <адрес получателя> <сумма>")
         return
 
     to_address = parameters[1]
@@ -113,6 +141,7 @@ def main():
     dispatcher.add_handler(CommandHandler('info', info))
     dispatcher.add_handler(CommandHandler('balance', balance))
     dispatcher.add_handler(CommandHandler('deposit', deposit))
+    dispatcher.add_handler(CommandHandler('bnb_balance', bnb_balance))
     dispatcher.add_handler(MessageHandler(Filters.command, unknown))
 
     updater.start_polling()
@@ -124,3 +153,5 @@ if __name__ == "__main__":
 
 #pip install python-telegram-bot
 #pip install tronapi
+#pip request
+#pip install python-dotenv
