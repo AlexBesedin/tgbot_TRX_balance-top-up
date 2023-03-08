@@ -22,7 +22,6 @@ BNB_WALLET = os.getenv('BNB_WALLET')
 PRIVATE_KEY_BNB = os.getenv('PRIVATE_KEY_BNB')
 BSC_NODE_ENDPOINT = os.getenv('BSC_NODE_ENDPOINT')
 
-
 full_node = HttpProvider('https://api.trongrid.io')
 solidity_node = HttpProvider('https://api.trongrid.io')
 event_server = HttpProvider('https://api.trongrid.io')
@@ -54,8 +53,6 @@ def info(update, context):
              "/trx_balance - Проверить текущий баланс TRX кошелька\r\n"
              "/bnb - Пополнить счёт своего BNB кошелька\r\n"
              "/trx - Пополнить счёт своего TRX кошелька\r\n"
-
-
     )
 
 
@@ -63,11 +60,9 @@ def send_bnb(private_key, to_address, value):
     # Установка соединения с BSC_NODE_ENDPOINT
     w3 = Web3(Web3.HTTPProvider(BSC_NODE_ENDPOINT))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
     # Получение Nonce
     from_address = w3.eth.account.from_key(private_key).address
     nonce = w3.eth.getTransactionCount(from_address)
-
     # Подготовка данных для отправки транзакции
     amount = Web3.toWei(value, 'ether')
 
@@ -81,10 +76,8 @@ def send_bnb(private_key, to_address, value):
 
     # Подписание транзакции
     signed_txn = w3.eth.account.sign_transaction(tx_data, private_key=private_key)
-
     # Отправка транзакции
     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-
     return tx_hash.hex()
 
 
@@ -147,7 +140,6 @@ def trx(update, context):
     # Извлечение параметров из сообщения пользователя
     message = update.message.text
     parameters = message.split(' ')
-
     # Проверка корректности ввода параметров
     if len(parameters) != 3:
         context.bot.send_message(chat_id=update.effective_chat.id,
@@ -157,7 +149,6 @@ def trx(update, context):
 
     to_address = parameters[1]
     amount = float(parameters[2])
-
     # Создание новой транзакции на пополнение кошелька
     result = api.trx.send_trx(
         to=to_address,
