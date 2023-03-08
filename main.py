@@ -10,7 +10,11 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s, %(levelname)s, '
+               '%(message)s, %(funcName)s, %(lineno)d'
+    )
 logger = logging.getLogger()
 
 load_dotenv()
@@ -103,7 +107,8 @@ def bnb(update, context):
     balance = get_balance_bnb(API_KEY_BSC, BNB_WALLET)
     context.bot.send_message(
         chat_id=chat_id,
-        text=f'Средства успешно отправлены.\r\nНовый баланс кошелька:  {balance:.6f} BNB'
+        text=f'Средства успешно отправлены.\r\n'
+             f'Новый баланс кошелька:  {balance:.6f} BNB'
     )
 
 
@@ -165,7 +170,8 @@ def trx(update, context):
     # Получение обновленного баланса кошелька
     balance = api.trx.get_balance(TRX_ADDRESS)
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"Средства успешно отправлены.\r\n Новый баланс кошелька: {balance / 10 ** 6} TRX")
+                             text=f"Средства успешно отправлены.\r\n "
+                                  f"Новый баланс кошелька: {balance / 10 ** 6} TRX")
 
 
 # Обработчик неизвестных команд
