@@ -1,4 +1,5 @@
 import logging
+import time
 import os
 import telegram
 import requests
@@ -40,7 +41,7 @@ bot = telegram.Bot(token=TELEGRAM_TOKEN)
 def start(update, context):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Привет! Я могу помочь тебе пополнить твои кошельки TRX, BNB.\r\n"
+        text="Привет! Я могу помочь тебе пополнить твои TRX и BNB кошельки.\r\n"
              "Если не знаешь с чего начать, запусти команду /info"
     )
 
@@ -49,8 +50,8 @@ def start(update, context):
 def info(update, context):
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="/bnb_balance - Проверить текущий баланс BNB кошелька\r\n"
-             "/trx_balance - Проверить текущий баланс TRX кошелька\r\n"
+        text="/bnb_balance - Текущий баланс BNB кошелька\r\n"
+             "/trx_balance - Текущий баланс TRX кошелька\r\n"
              "/bnb - Пополнить счёт своего BNB кошелька\r\n"
              "/trx - Пополнить счёт своего TRX кошелька\r\n"
     )
@@ -98,10 +99,11 @@ def bnb(update, context):
     value = float(parameters[2])
     result = send_bnb(PRIVATE_KEY_BNB, to_address, value)
     print(result)
+    time.sleep(5)
     balance = get_balance_bnb(API_KEY_BSC, BNB_WALLET)
     context.bot.send_message(
         chat_id=chat_id,
-        text=f'Ваш текущий баланс: {balance:.6f} BNB'
+        text=f'Средства успешно отправлены.\r\nНовый баланс кошелька:  {balance:.6f} BNB'
     )
 
 
@@ -121,7 +123,7 @@ def bnb_balance(update, context):
     balance = get_balance_bnb(API_KEY_BSC, BNB_WALLET)
     context.bot.send_message(
         chat_id=chat_id,
-        text=f'Ваш текущий баланс: {balance:.6f} BNB'
+        text=f'Текущий баланс кошелька: {balance:.6f} BNB'
     )
 
 
@@ -131,7 +133,7 @@ def trx_balance(update, context):
     balance = account['balance'] # Извлечение текущего баланса
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"💵Текущий баланс кошелька: {balance / 10**6} TRX"
+        text=f"Текущий баланс кошелька: {balance / 10**6} TRX"
     )
 
 
@@ -163,7 +165,7 @@ def trx(update, context):
     # Получение обновленного баланса кошелька
     balance = api.trx.get_balance(TRX_ADDRESS)
     context.bot.send_message(chat_id=update.effective_chat.id,
-                             text=f"Средства успешно отправлены. Новый баланс кошелька: {balance / 10 ** 6} TRX")
+                             text=f"Средства успешно отправлены.\r\n Новый баланс кошелька: {balance / 10 ** 6} TRX")
 
 
 # Обработчик неизвестных команд
