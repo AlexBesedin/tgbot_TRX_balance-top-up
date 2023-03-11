@@ -25,7 +25,9 @@ PRIVATE_KEY_TRX = os.getenv('PRIVATE_KEY')
 API_KEY_BSC = os.getenv('API_KEY_BSC')
 BNB_WALLET = os.getenv('BNB_WALLET')
 PRIVATE_KEY_BNB = os.getenv('PRIVATE_KEY_BNB')
-BSC_NODE_ENDPOINT = os.getenv('BSC_NODE_ENDPOINT')
+
+
+bsc_node = HttpProvider('https://bsc-dataseed.binance.org')
 
 full_node = HttpProvider('https://api.trongrid.io')
 solidity_node = HttpProvider('https://api.trongrid.io')
@@ -63,7 +65,7 @@ def info(update, context):
 
 def send_bnb(private_key, to_address, value):
     # Установка соединения с BSC_NODE_ENDPOINT
-    w3 = Web3(Web3.HTTPProvider(BSC_NODE_ENDPOINT))
+    w3 = Web3(Web3.HTTPProvider(bsc_node))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     # Получение Nonce
     from_address = w3.eth.account.from_key(private_key).address
@@ -78,10 +80,7 @@ def send_bnb(private_key, to_address, value):
         'gasPrice': w3.toWei('5', 'gwei'),
         'nonce': nonce
     }
-
-    # Подписание транзакции
     signed_txn = w3.eth.account.sign_transaction(tx_data, private_key=private_key)
-    # Отправка транзакции
     tx_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
     return tx_hash.hex()
 
@@ -91,8 +90,6 @@ def bnb(update, context):
     chat_id = update.message.chat_id
     message = update.message.text
     parameters = message.split(' ')
-
-    # Проверка корректности ввода параметров
     if len(parameters) != 3:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text="Некорректный ввод параметров. \r\n"
@@ -144,10 +141,8 @@ def trx_balance(update, context):
 
 # Обработчик команды /trx
 def trx(update, context):
-    # Извлечение параметров из сообщения пользователя
     message = update.message.text
     parameters = message.split(' ')
-    # Проверка корректности ввода параметров
     if len(parameters) != 3:
         context.bot.send_message(chat_id=update.effective_chat.id,
                                  text="Некорректный ввод параметров. \r\n"
@@ -156,7 +151,6 @@ def trx(update, context):
 
     to_address = parameters[1]
     amount = float(parameters[2])
-    # Создание новой транзакции на пополнение кошелька
     result = api.trx.send_trx(
         to=to_address,
         amount=amount,
@@ -164,10 +158,7 @@ def trx(update, context):
             'from': TRX_ADDRESS
         }
     )
-
-    # Распечатка результата отправки транзакции
     print(result)
-    # Получение обновленного баланса кошелька
     balance = api.trx.get_balance(TRX_ADDRESS)
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text=f"Средства успешно отправлены.\r\n "
@@ -206,3 +197,4 @@ if __name__ == "__main__":
 #pip request
 #pip install python-dotenv
 #pip install web3
+#BSC_NODE_ENDPOINT =https://docs.bnbchain.org/docs/rpc/
